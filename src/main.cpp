@@ -32,7 +32,26 @@ int call[10000];
 int cache[10000];
 int n = 0;
 int readhit, readmiss, writehit, writemiss, read, write;
-void readhex() {
+void Inputfile();
+int countindex(int );
+int counttag(int );
+void readindata(int , int , int ); 
+void writeindata(int , int , int );
+void readininstr(int , int , int );
+void evict(int , int , int);
+void erase_cache();
+void INFO();
+void GUI();
+void loop();
+int main(int argc, char *argv[]) {
+	mode == 2;
+  	GUI();
+  	Inputfile();
+  	loop();
+
+  return 0;
+}
+void Inputfile() {
   std::ifstream file("data.txt");
   if (file.fail()) {
     std::cout << "Failed to open this file!" << std::endl;
@@ -212,13 +231,12 @@ void INFO() {
   output << "# cache hits: " << readhit + writehit << std::endl;
   output << "# cache misses :" << readmiss + writemiss << std::endl;
   double  rate = (double)(readhit + writehit) / (read + write) * 100;
-  output << "Cache hit ratio :" << std::fixed << std::setprecision(2)
-          << rate << "%" << std::endl;
+  output << "Cache hit ratio :" << std::fixed << std::setprecision(2) << rate << "%" << std::endl;
   output << "========================" << std::endl;
   output.close();
 }
 
-void clearcache() {
+void erase_cache() {
 	block block;
 
 
@@ -239,7 +257,7 @@ void clearcache() {
   block = {};
   output.close();
 }
-void hello() {
+void GUI() {
   std::fstream output;
   output.open(std::ctime(&end_time) + log_file_type, std::ios::out);
   output << "========================" << std::endl;
@@ -267,7 +285,7 @@ for (int i = 1; i <= n; i++) {
       evict(cache[i], tag, index);
     break;
     case 8:
-      clearcache();
+      erase_cache();
     break;
     case 9:
       std::fstream output;
@@ -280,12 +298,4 @@ for (int i = 1; i <= n; i++) {
     }
     std::cout << i << std::endl;
   }
-}
-int main() {
-	mode == 2;
-  	hello();
-  	readhex();
-  	loop();
-
-  return 0;
 }
