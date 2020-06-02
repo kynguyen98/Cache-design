@@ -44,7 +44,7 @@ void INFO();
 void GUI();
 void loop();
 int main(int argc, char *argv[]) {
-	mode == 2;
+    std::cout<<" Type in mode: ";std::cin>>mode;
   	GUI();
   	Inputfile();
   	loop();
