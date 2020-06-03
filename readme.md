@@ -35,6 +35,7 @@ make clean
 ./main data.txt
 ```
 * Here is the screenshot of the process
+
 ![INPUT](/image/input.png)
 
 # Output 
