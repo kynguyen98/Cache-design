@@ -43,8 +43,7 @@ block data_cache[16384][4];
 int call[10000];
 int cache[10000];
 int n = 0;
-int readhit, readmiss, writehit, writemiss, read, write;
-
+int readhit, writehit,readmiss, writemiss, read, write;
 
 int main(int argc, char *argv[]) {
 
@@ -77,10 +76,10 @@ void Inputfile(std::string filename) {
   file.close();
 }
 int find_index(int data) {
-  int offsets;
+  int off;
   data = data / 64;
-  offsets = data % 16384;
-  return offsets;
+  off = data % 16384;
+  return off;
 }
 int find_tag(int data) {
   int tag;
@@ -208,7 +207,10 @@ void readininstr(int data, int tag, int index) {
   }
   file.close();
 }
-
+/* when using LRU policy and when cache try to add block to a fat cache 
+the cache will overflow so 
+we need to pop out least recently use bit evict it to make new space for new block
+*/
 void evict(int data, int tag, int index) {
   std::cout << "OFF " << data << std::endl;
   if (data < 16777216) {
