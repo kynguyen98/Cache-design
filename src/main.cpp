@@ -4,14 +4,24 @@
 #include <iomanip>
 #include <iostream>
 #include <stdio.h>
-#include <string.h>
+#include <string>
 
-typedef struct block {
+typedef struct {
   int lru;
   int tag;
   int valid;
-} block; 
+}block ; 
 int mode ;
+void Inputfile(std::string);
+int find_index(int );
+int find_tag(int );
+void readindata(int , int , int ); 
+void writeindata(int , int , int );
+void readininstr(int , int , int );
+void evict(int , int , int);
+void erase_cache();
+void INFO();
+void loop();
 // Some global variable
 std::string log_file_type = ".log";
 auto start = std::chrono::system_clock::now(); // Start time
@@ -20,10 +30,11 @@ std::chrono::duration<double> elapsed_seconds =
     end - start; // Do some calculation of time
 std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
+// Because the ache is 16k set so we consider the size1 which is the size of the cache 
 int size1[16384];
-int lru1[16384];
+int lru1[16384]; // lru for the cache when we use 2 way set associated to update the last bit been used 
 
-int size2[16384];
+int size2[16384]; // size2 would be the size of the memory outside the cache we want to take away from 
 int lru2[16384];
 
 block inst_cache[16384][2];
@@ -32,27 +43,28 @@ int call[10000];
 int cache[10000];
 int n = 0;
 int readhit, readmiss, writehit, writemiss, read, write;
-void Inputfile();
-int countindex(int );
-int counttag(int );
-void readindata(int , int , int ); 
-void writeindata(int , int , int );
-void readininstr(int , int , int );
-void evict(int , int , int);
-void erase_cache();
-void INFO();
-void GUI();
-void loop();
-int main(int argc, char *argv[]) {
-    std::cout<<" Type in mode: ";std::cin>>mode;
-  	GUI();
-  	Inputfile();
-  	loop();
 
-  return 0;
+
+int main(int argc, char *argv[]) {
+
+    if (argc < 2){
+      // Tell the user how to run the program
+      std::cout<<"ERROR! Incorrect argument!"<<std::endl;
+      std::cerr << "Usage: " << std::endl;
+      std::cout << " ./main DATANAME" << std::endl;
+      		// how to run a program when they enter command incorrectly
+      return 1;
+    }
+    std::cout<<" Type in mode: ";std::cin>>mode;
+    for (int i = 1; i < argc; i++){
+    std::string filename(argv[i]);
+  	Inputfile(filename);
+    }
+  	loop();
+    std::cout<<"Please check the log file!"<<std::endl;
 }
-void Inputfile() {
-  std::ifstream file("data.txt");
+void Inputfile(std::string filename) {
+  std::ifstream file(filename);
   if (file.fail()) {
     std::cout << "Failed to open this file!" << std::endl;
   } else {
@@ -63,13 +75,13 @@ void Inputfile() {
   }
   file.close();
 }
-int countindex(int data) {
+int find_index(int data) {
   int offsets;
   data = data / 64;
   offsets = data % 16384;
   return offsets;
 }
-int counttag(int data) {
+int find_tag(int data) {
   int tag;
   data = data / 64;
   tag = data / 16384;
@@ -216,34 +228,31 @@ void evict(int data, int tag, int index) {
 }
 void INFO() {
   std::fstream output;
-  output.open(std::ctime(&end_time) + log_file_type,
-               std::ios::out | std::ios::app);
+  output.open(std::ctime(&end_time) + log_file_type, std::ios::out | std::ios::app);
+  output << "[LOG] Mode: " << mode << std::endl;
   output << "========================" << std::endl;
-  output << "# cache reads :" << read << std::endl;
-  output << "# cache writes :" << write << std::endl;
-  output << "========================" << std::endl;
-  output << "Read miss : " << readmiss << std::endl;
-  output << "Write miss :" << writemiss << std::endl;
-  output << "========================" << std::endl;
-  output << "Read hit : " << readhit << std::endl;
-  output << "Write hit :" << writehit << std::endl;
-  output << "========================" << std::endl;
-  output << "# cache hits: " << readhit + writehit << std::endl;
-  output << "# cache misses :" << readmiss + writemiss << std::endl;
+  output << "> #reads         :" << read << std::endl;
+  output << "> #writes        :" << write << std::endl;
+  output << "> Read miss      :" << readmiss << std::endl;
+  output << "> Write miss     :" << writemiss << std::endl;
+  output << "> Read hit       :"  << readhit << std::endl;
+  output << "> Write hit      :" << writehit << std::endl;
+  output << "> #cache hits    :" << readhit + writehit << std::endl;
+  output << "> #cache misses  :" << readmiss + writemiss << std::endl;
   double  rate = (double)(readhit + writehit) / (read + write) * 100;
-  output << "Cache hit ratio :" << std::fixed << std::setprecision(2) << rate << "%" << std::endl;
+  output << "> hit ratio      :" << std::fixed << std::setprecision(2) << rate << "%" << std::endl;
   output << "========================" << std::endl;
+  output << std::endl;
   output.close();
 }
 
 void erase_cache() {
 	block block;
-
-
   std::fstream output;
-  output.open(std::ctime(&end_time) + log_file_type,
-               std::ios::out | std::ios::app);
+  output.open(std::ctime(&end_time) + log_file_type, std::ios::out | std::ios::app);
+  if (mode == 2){
   output << "XX -CACHE CLEAR - XX" << std::endl;
+  }
   std::fill(std::begin(size1), std::end(size1), 0);
   std::fill(std::begin(lru1), std::end(lru1), 0);
   std::fill(std::begin(size2), std::end(size2), 0);
@@ -257,17 +266,11 @@ void erase_cache() {
   block = {};
   output.close();
 }
-void GUI() {
-  std::fstream output;
-  output.open(std::ctime(&end_time) + log_file_type, std::ios::out);
-  output << "========================" << std::endl;
-  output.close();
-}
 void loop(){
 for (int i = 1; i <= n; i++) {
     int index, tag;
-    index = countindex(cache[i]);
-    tag = counttag(cache[i]);
+    index = find_index(cache[i]);
+    tag = find_tag(cache[i]);
 	switch (call[i]){
     case 0: 
       read++;
@@ -291,11 +294,10 @@ for (int i = 1; i <= n; i++) {
       std::fstream output;
       output.open(std::ctime(&end_time) + log_file_type,
                    std::ios::out | std::ios::app);
-      output << "--------------------------" << std::endl;
+      output << "========================" << std::endl;
       output.close();
       INFO();
 	  break;
     }
-    std::cout << i << std::endl;
   }
 }
