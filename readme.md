@@ -1,5 +1,5 @@
 # Cache simulation L1 
-Cache design by team 5 for ECE-485 final project
+Cache design for ECE-485 final project
 * Open source, anyone can contribute to the source code
 * Cross-platform *obvious* 
 * Implement C++ code for this project
