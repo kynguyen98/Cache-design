@@ -6,12 +6,17 @@
 #include <stdio.h>
 #include <string>
 #include <cstring>
-
+#include <cstdlib>
+/* in a block of data that has 16k set 
+  * each set has 4 line corresponding 4 way data
+  * block of instruction still has 16k set but each set has 2 lines or 2 way
+*/
 typedef struct {
   int lru;
   int tag;
   int valid;
 }block ; 
+
 int mode ;
 void Inputfile(std::string);
 int find_index(int );
@@ -39,10 +44,19 @@ int size2[16384]; // size2 would be the size of the memory outside the cache we 
 int lru2[16384];
 
 block inst_cache[16384][2];
+/* 16384 just to store the index or to find the index and [2] for valid and dirt
+* like 1 block 1 set and in 1 set has 2 way instruction and 4 way for data cache
+* sau khi nhap dia chi tu file vo thi tinh tag + index roi dung index chi vo cai way instruction cache de cho 2 cai cung index
+* cung index roi so sanh cai tag
+*/
 block data_cache[16384][4];
 int call[10000];
 int cache[10000];
 int n = 0;
+/*
+* tag giong nhau thi read hit ko thi read miss
+* write thi phai kiem tra no day chua 
+*/
 int readhit, readmiss, writehit, writemiss, read, write;
 
 
@@ -51,16 +65,13 @@ int main(int argc, char *argv[]) {
     if (argc < 2){
       // Tell the user how to run the program
       std::cout<<"ERROR! Incorrect argument!"<<std::endl;
-      std::cerr << "Usage: " << std::endl;
-      std::cout << " ./main DATANAME" << std::endl;
+      std::cerr << "Usage: " << "./main [DATANAME] [MODE]" << std::endl;
       		// how to run a program when they enter command incorrectly
       return 1;
     }
-    std::cout<<" Type in mode: ";std::cin>>mode;
-    for (int i = 1; i < argc; i++){
-    std::string filename(argv[i]);
+    std::string filename(argv[1]);
+    mode =  atoi(argv[2]);
   	Inputfile(filename);
-    }
   	loop();
     std::cout<<"Please check the log file!"<<std::endl;
 }
