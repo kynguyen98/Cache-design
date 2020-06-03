@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
+#include <cstring>
 
 typedef struct {
   int lru;
@@ -247,8 +248,8 @@ void INFO() {
 }
 
 void erase_cache() {
-	block block;
   std::fstream output;
+  block block;
   output.open(std::ctime(&end_time) + log_file_type, std::ios::out | std::ios::app);
   if (mode == 2){
   output << "XX -CACHE CLEAR - XX" << std::endl;
@@ -263,7 +264,7 @@ void erase_cache() {
   writemiss = 0;
   read = 0;
   write = 0;
-  block = {};
+  std::memset(&block, 0, sizeof(block));
   output.close();
 }
 void loop(){
