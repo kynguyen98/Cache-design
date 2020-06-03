@@ -1,5 +1,5 @@
 CC		:= g++
-CFLAGS	:= -std=c++17 -Wall -Wextra -g
+CFLAGS	:= -std=c++17 -Wall -Wextra -g -Iinclude/
 
 BIN		:= bin
 SRC		:= src
@@ -15,6 +15,8 @@ INCLUDEDIRS	:= $(INCLUDE)
 LIBDIRS		:= $(LIB)
 else
 EXECUTABLE	:= main
+LOG			:= *.log
+DATASET		:= data.txt
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
 LIBDIRS		:= $(shell find $(LIB) -type d)
@@ -32,10 +34,12 @@ all: $(BIN)/$(EXECUTABLE)
 clean:
 	-$(RM) $(BIN)/$(EXECUTABLE)
 	-$(RM) $(OBJECTS)
+	-$(RM) $(LOG)
+	-$(RM) $(BIN)/$(LOG)
 
 
 run: all
-	./$(BIN)/$(EXECUTABLE)
+	./$(BIN)/$(EXECUTABLE) 
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
