@@ -15,8 +15,12 @@ typedef struct {
   int lru;
   int tag;
   int valid;
+  int dirt;
 }block ; 
-
+/*
+* example we have 0 1 2 3 4 bit lru 
+* each time we implement it we change the least recently use bit like this 4 0 1 2 3 for each access
+*/
 int mode ;
 void Inputfile(std::string);
 int find_index(int );
@@ -38,13 +42,19 @@ std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
 // Because the ache is 16k set so we consider the size1 which is the size of the cache 
 int size1[16384];
-int lru1[16384]; // lru for the cache when we use 2 way set associated to update the last bit been used 
-
+int lru1[16384]; 
+/* lru for the cache when we use 2 way set associated to update the last bit been used 
+* mainting an lru is very complicated 
+* for example if we have N way set associated that mean:
+* we need log2(N) bits counter to maintain a proper lru
+* need to change counter every access
+*/
 int size2[16384]; // size2 would be the size of the memory outside the cache we want to take away from 
 int lru2[16384];
 
 block inst_cache[16384][2];
 /* 16384 just to store the index or to find the index and [2] for valid and dirt
+* 1 line has 32 bit
 * like 1 block 1 set and in 1 set has 2 way instruction and 4 way for data cache
 * sau khi nhap dia chi tu file vo thi tinh tag + index roi dung index chi vo cai way instruction cache de cho 2 cai cung index
 * cung index roi so sanh cai tag
@@ -70,7 +80,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     std::string filename(argv[1]);
-    mode =  atoi(argv[2]);
+    mode = atoi(argv[2]);
   	Inputfile(filename);
   	loop();
     std::cout<<"Please check the log file!"<<std::endl;
@@ -88,17 +98,24 @@ void Inputfile(std::string filename) {
   file.close();
 }
 int find_index(int data) {
-  int offsets;
+  int off;
   data = data / 64;
-  offsets = data % 16384;
-  return offsets;
+  off = data % 16384;
+  return off;
 }
+/*
+* we can find offset to know the way
+*/
 int find_tag(int data) {
   int tag;
   data = data / 64;
   tag = data / 16384;
   return tag;
 }
+/*
+* read from text file then store it in an array
+* in cpu it understand as binary so no need to convert 
+*/
 void readindata(int data, int tag, int index) {
   std::fstream file;
   file.open(std::ctime(&end_time) + log_file_type,
@@ -112,6 +129,9 @@ void readindata(int data, int tag, int index) {
       data_cache[index][i].lru = lru1[index];
     }
   }
+  /*
+   * If read miss then just pull from memory L2
+  */
   if (tick == 0) {
     readmiss++;
 	if (mode == 2 ){
