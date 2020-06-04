@@ -32,7 +32,7 @@ make clean
 ## To run the project 
 * Navigate to bin directory and run command 
 ```
-./main data.txt
+./main [DATASET] [MODE]
 ```
 * Here is the screenshot of the process
 
