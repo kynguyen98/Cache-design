@@ -15,7 +15,6 @@ typedef struct {
   int lru;
   int tag;
   int valid;
-  int dirt;
 }block ; 
 /*
 * example we have 0 1 2 3 4 bit lru 
@@ -23,12 +22,12 @@ typedef struct {
 */
 int mode ;
 void Inputfile(std::string);
-int find_index(int );
-int find_tag(int );
-void readindata(int , int , int ); 
-void writeindata(int , int , int );
-void readininstr(int , int , int );
-void evict(int , int , int);
+int find_index(int);
+int find_tag(int);
+void readindata(int, int, int); 
+void writeindata(int, int, int);
+void readinstrct(int, int, int);
+void evict(int, int, int);
 void erase_cache();
 void INFO();
 void loop();
@@ -88,7 +87,7 @@ int main(int argc, char *argv[]) {
 void Inputfile(std::string filename) {
   std::ifstream file(filename);
   if (file.fail()) {
-    std::cout << "Failed to open this file!" << std::endl;
+    std::cout << "Failed to open file!" << std::endl;
   } else {
     while (!file.eof()) {
       n++;
@@ -98,10 +97,10 @@ void Inputfile(std::string filename) {
   file.close();
 }
 int find_index(int data) {
-  int off;
+  int index;
   data = data / 64;
-  off = data % 16384;
-  return off;
+  index = data % 16384;
+  return index;
 }
 /*
 * we can find offset to know the way
@@ -159,7 +158,6 @@ void readindata(int data, int tag, int index) {
   }
   file.close();
 }
-
 void writeindata(int data, int tag, int index) {
   std::fstream file;
   file.open(std::ctime(&end_time) + log_file_type,
@@ -200,9 +198,7 @@ void writeindata(int data, int tag, int index) {
   }
   file.close();
 }
-
-
-void readininstr(int data, int tag, int index) {
+void readinstrct(int data, int tag, int index) {
   std::fstream file;
   file.open(std::ctime(&end_time) + log_file_type,
                std::ios::out | std::ios::app);
@@ -239,7 +235,6 @@ void readininstr(int data, int tag, int index) {
   }
   file.close();
 }
-
 void evict(int data, int tag, int index) {
   std::cout << "OFF " << data << std::endl;
   if (data < 16777216) {
@@ -277,7 +272,6 @@ void INFO() {
   output << std::endl;
   output.close();
 }
-
 void erase_cache() {
   std::fstream output;
   block block;
@@ -300,35 +294,34 @@ void erase_cache() {
 }
 void loop(){
 for (int i = 1; i <= n; i++) {
-    int index, tag;
-    index = find_index(cache[i]);
-    tag = find_tag(cache[i]);
+  int index, tag;
+  index = find_index(cache[i]);
+  tag = find_tag(cache[i]);
 	switch (call[i]){
     case 0: 
-      read++;
-      readindata(cache[i], tag, index);
-	break;
+    read++;
+    readindata(cache[i], tag, index);
+	  break;
     case 1: 
-      write++;
-      writeindata(cache[i], tag, index);
+    write++;
+    writeindata(cache[i], tag, index);
     break;
     case 2:
-      read++;
-      readininstr(cache[i], tag, index);
+    read++;
+    readinstrct(cache[i], tag, index);
     break;
     case 3:
-      evict(cache[i], tag, index);
+    evict(cache[i], tag, index);
     break;
     case 8:
-      erase_cache();
+    erase_cache();
     break;
     case 9:
-      std::fstream output;
-      output.open(std::ctime(&end_time) + log_file_type,
-                   std::ios::out | std::ios::app);
-      output << "========================" << std::endl;
-      output.close();
-      INFO();
+    std::fstream output;
+    output.open(std::ctime(&end_time) + log_file_type, std::ios::out | std::ios::app);
+    output << "========================" << std::endl;
+    output.close();
+    INFO();
 	  break;
     }
   }
